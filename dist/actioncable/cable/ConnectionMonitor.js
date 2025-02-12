@@ -3,65 +3,60 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     # Responsible for ensuring the cable connection is in good health by validating the heartbeat pings sent from the server, and attempting
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     # revival reconnections if things go astray. Internal class, not intended for direct user manipulation.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     */
-
-
-var _Logger = require("../Logger");
-
-var _Logger2 = _interopRequireDefault(_Logger);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
+exports["default"] = void 0;
+var _Logger = _interopRequireDefault(require("../Logger"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } /*
+# Responsible for ensuring the cable connection is in good health by validating
+  the heartbeat pings sent from the server, and attempting
+# revival reconnections if things go astray. Internal class, not intended for
+  direct user manipulation.
+*/
 var now = function now() {
   return new Date().getTime();
 };
-
 var secondsSince = function secondsSince(time) {
   return (now() - time) / 1000;
 };
-
 var clamp = function clamp(number, min, max) {
   return Math.max(min, Math.min(max, number));
 };
-
-var ConnectionMonitor = function () {
+var ConnectionMonitor = /*#__PURE__*/function () {
   function ConnectionMonitor(consumer) {
     _classCallCheck(this, ConnectionMonitor);
-
     this.pollInterval = {
       min: 3,
       max: 30
     };
     this.staleThreshold = 6;
     this.consumer = consumer;
-    this.visibilityDidChange = this._visibilityDidChange.bind(this);
+    this.visibilityDidChange = this.visibilityDidChange.bind(this);
     this.start();
   }
-
-  _createClass(ConnectionMonitor, [{
+  return _createClass(ConnectionMonitor, [{
     key: "connected",
     value: function connected() {
       this.reset();
       this.pingedAt = now();
       delete this.disconnectedAt;
-      return _Logger2.default.log("ConnectionMonitor connected");
+      return _Logger["default"].log('ConnectionMonitor connected');
     }
   }, {
     key: "disconnected",
     value: function disconnected() {
       this.disconnectedAt = now();
-      return _Logger2.default.log("ConnectionMonitor disconnected");
+      return _Logger["default"].log('ConnectionMonitor disconnected');
     }
   }, {
     key: "ping",
     value: function ping() {
-      return this.pingedAt = now();
+      this.pingedAt = now();
+      return this.pinedAt;
     }
   }, {
     key: "reset",
@@ -77,58 +72,60 @@ var ConnectionMonitor = function () {
       this.startedAt = now();
       this.poll();
       if (typeof document !== 'undefined') {
-        document.addEventListener("visibilitychange", this.visibilityDidChange);
-      };
-      return _Logger2.default.log("ConnectionMonitor started, pollInterval is " + this.getInterval() + "ms");
+        document.addEventListener('visibilitychange', this.visibilityDidChange);
+      }
+      return _Logger["default"].log("ConnectionMonitor started, pollInterval is ".concat(this.getInterval(), "ms"));
     }
   }, {
     key: "stop",
     value: function stop() {
       this.stoppedAt = now();
       if (typeof document !== 'undefined') {
-        document.removeEventListener("visibilitychange", this.visibilityDidChange);
-      };
-      return _Logger2.default.log("ConnectionMonitor stopped");
+        document.removeEventListener('visibilitychange', this.visibilityDidChange);
+      }
+      return _Logger["default"].log('ConnectionMonitor stopped');
     }
   }, {
     key: "poll",
     value: function poll() {
-      return setTimeout(function (_this) {
+      return setTimeout(function (that) {
         return function () {
-          if (!_this.stoppedAt) {
-            _this.reconnectIfStale();
-            return _this.poll();
+          if (!that.stoppedAt) {
+            that.reconnectIfStale();
+            return that.poll();
           }
+          return true;
         };
       }(this), this.getInterval());
     }
   }, {
     key: "getInterval",
     value: function getInterval() {
-      var interval, max, min, ref;
-      ref = this.pollInterval, min = ref.min, max = ref.max;
-      interval = 5 * Math.log(this.reconnectAttempts + 1);
+      var ref = this.pollInterval;
+      var min = ref.min;
+      var max = ref.max;
+      var interval = 5 * Math.log(this.reconnectAttempts + 1);
       return clamp(interval, min, max) * 1000;
     }
   }, {
     key: "reconnectIfStale",
     value: function reconnectIfStale() {
       if (this.connectionIsStale()) {
-        _Logger2.default.log("ConnectionMonitor detected stale connection, reconnectAttempts = " + this.reconnectAttempts);
-        this.reconnectAttempts++;
+        _Logger["default"].log("ConnectionMonitor detected stale connection, reconnectAttempts = ".concat(this.reconnectAttempts));
+        this.reconnectAttempts += 1;
         if (this.disconnectedRecently()) {
-          return _Logger2.default.log("ConnectionMonitor skipping reopen because recently disconnected at " + this.disconnectedAt);
-        } else {
-          _Logger2.default.log("ConnectionMonitor reopening");
-          return this.consumer.connection.reopen();
+          return _Logger["default"].log("ConnectionMonitor skipping reopen because recently disconnected at ".concat(this.disconnectedAt));
         }
+        _Logger["default"].log('ConnectionMonitor reopening');
+        return this.consumer.connection.reopen();
       }
+      return true;
     }
   }, {
     key: "connectionIsStale",
     value: function connectionIsStale() {
-      var ref;
-      return secondsSince((ref = this.pingedAt) != null ? ref : this.startedAt) > this.staleThreshold;
+      var pingedAt = this.pingedAt !== null ? this.pingedAt : this.startedAt;
+      return pingedAt > this.stateThreshold;
     }
   }, {
     key: "disconnectedRecently",
@@ -136,25 +133,26 @@ var ConnectionMonitor = function () {
       return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.staleThreshold;
     }
   }, {
-    key: "_visibilityDidChange",
-    value: function _visibilityDidChange() {
-      if (document.visibilityState === "visible") {
-        return setTimeout(function (_this) {
+    key: "visibilityDidChange",
+    value: function visibilityDidChange() {
+      if (document.visibilityState === 'visible') {
+        return setTimeout(function (that) {
           return function () {
-            if (_this.connectionIsStale() || !_this.consumer.connection.isOpen()) {
-              _Logger2.default.log("ConnectionMonitor reopening stale connection after visibilitychange to " + document.visibilityState);
-              return _this.consumer.connection.reopen();
+            if (that.connectionIsStale() || !that.consumer.connection.isOpen()) {
+              _Logger["default"].log("ConnectionMonitor reopening stale connection after visibilitychange to ".concat(document.visibilityState));
+              return that.consumer.connection.reopen();
             }
+            return true;
           };
         }(this), 200);
       }
+      return true;
     }
   }, {
     key: "toJSON",
     value: function toJSON() {
-      var connectionIsStale, interval;
-      interval = this.getInterval();
-      connectionIsStale = this.connectionIsStale();
+      var interval = this.getInterval();
+      var connectionIsStale = this.connectionIsStale();
       return {
         startedAt: this.startedAt,
         stoppedAt: this.stoppedAt,
@@ -165,8 +163,5 @@ var ConnectionMonitor = function () {
       };
     }
   }]);
-
-  return ConnectionMonitor;
 }();
-
-exports.default = ConnectionMonitor;
+var _default = exports["default"] = ConnectionMonitor;
